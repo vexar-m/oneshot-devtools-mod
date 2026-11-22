@@ -234,7 +234,9 @@ class Window_Settings
       @data = @event_list.map { |ev| "#{ev.id}: #{ev.name}" }
     when :teleport
       @map_list = []
-      $MapInfo.each_with_index do |info, id|
+      # $MapInfo в OneShot не существует — MapInfos.rxdata грузим сами
+      map_infos = load_data("Data/MapInfos.rxdata")
+      map_infos.each do |id, info|
         next if info.nil? || info.name.empty?
         next if info.name[0, 1] == '!'   # скрытые карты Oneshot
         @map_list << [id, info.name]
