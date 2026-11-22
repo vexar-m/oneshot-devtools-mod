@@ -115,6 +115,7 @@ class Window_Settings
     @transfer_x = 0
     @transfer_y = 0
     @transfer_dir = 0
+    @reset_to_title = false
     @visible = false
   end
 
@@ -226,7 +227,11 @@ class Window_Settings
         'Noclip',
         'Show Events',
         'Start Event',
-        'Debug Menu (Switches/Vars)'
+        'Debug Menu (Switches/Vars)',
+        'Goto Debug Room',
+        'Speed Up',
+        'Reset Game',
+        'Reset Game + Delete Save'
       ]
     when :eventlist
       # эвенты текущей карты, сортировка по id
@@ -375,6 +380,11 @@ class Window_Settings
           $game_temp.transition_processing = true
           $game_temp.transition_name = "black"
           @transfer_map_id = nil
+        end
+
+        if @reset_to_title
+          @reset_to_title = false
+          $scene = Scene_Title.new
         end
       end
       return
@@ -685,6 +695,34 @@ class Window_Settings
           $game_temp.debug_calling = true
           @fade_out = true
         end
+      when 7 # Goto Debug Room — быстрый телепорт на карту DEBUG (id 11)
+        if Input.trigger?(Input::ACTION)
+          $game_system.se_play($data_system.decision_se)
+          teleport_to(11)
+        end
+      when 8 # Speed Up — чит-скорость бега
+        if Input.trigger?(Input::ACTION)
+          $game_system.se_play($data_system.decision_se)
+          if $debug_speed
+            $debug_speed = false
+          else
+            $debug_speed = true
+            $debug_cheats_used = true
+          end
+        end
+      when 9 # Reset Game — мягкий сброс на титульный экран
+        if Input.trigger?(Input::ACTION)
+          $game_system.se_play($data_system.cancel_se)
+          @reset_to_title = true
+          @fade_out = true
+        end
+      when 10 # Reset Game + Delete Save — сброс с удалением сейвов
+        if Input.trigger?(Input::ACTION)
+          $game_system.se_play($data_system.cancel_se)
+          delete_save_files
+          @reset_to_title = true
+          @fade_out = true
+        end
       end
     elsif @menu_mode == :teleport # список карт
       if Input.trigger?(Input::ACTION)
@@ -729,6 +767,20 @@ class Window_Settings
     @transfer_dir = 0 # 0 = не менять направление взгляда после телепорта
     $debug_cheats_used = true
     @fade_out = true
+  end
+
+  # Удаляем сейв и бэкапы; persistent.dat (язык, настройки) не трогаем
+  def delete_save_files
+    if File.exists?(SAVE_FILE_NAME)
+      File.delete(SAVE_FILE_NAME)
+    end
+    if File.exists?(FAKE_SAVE_NAME)
+      File.delete(FAKE_SAVE_NAME)
+    end
+    backups = Dir[Oneshot::SAVE_PATH + "/save_backups/*.bk"]
+    backups.each do |f|
+      File.delete(f)
+    end
   end
 
   # Attributes

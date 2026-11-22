@@ -24,6 +24,9 @@ class CheatStatusDebug < Sprite
     if $debug_noclip
       lines << "NOCLIP"
     end
+    if $debug_speed
+      lines << "SPEED"
+    end
     if $debug_hitboxes && !$debug_hitboxes.disposed?
       lines << "HITBOXES"
     end

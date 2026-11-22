@@ -189,6 +189,9 @@ class Game_Player < Game_Character
 	  else
         @move_speed = Input.press?(Input::RUN) ? 3 : 4
 	  end
+	  if $debug_speed # чит-скорость из Developer Tools
+	    @move_speed = 6
+	  end
       unless moving?
         # Move player in the direction the directional button is being pressed
         case Input.dir4
